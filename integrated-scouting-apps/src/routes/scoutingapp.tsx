@@ -4,7 +4,7 @@ import { Button } from 'antd';
 
 interface Props {
   title: string;
-  buttons: { text: string, link: string }[];
+  buttons: { text: string, link: string, style: string }[];
 }
 
 function homePage(props: Props) {
@@ -18,8 +18,11 @@ function homePage(props: Props) {
       </div>
       <div className='body'>
         {props.buttons.map((button, index) => (
-            <Button key={index} href={button.link}>{button.text}</Button>
-          ))}
+          <div>
+            <Button className={button.style} key={index} href={button.link}>{button.text}</Button>
+            <br></br>
+          </div>
+        ))}
       </div> 
     </body>
   );

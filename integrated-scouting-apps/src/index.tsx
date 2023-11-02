@@ -14,19 +14,19 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 const homePage = {
   title: 'Strategy Apps',
   buttons: [
-    { text: 'Scouting App', link: '/scoutingapp' },
-    { text: 'Drive Team Feeder', link: '/dtf' }
+    {text: 'Scouting App', link: '/scoutingapp', style: 'mainbutton'},
+    {text: 'Drive Team Feeder', link: '/dtf', style: 'mainbutton'}
   ]
 };
-
 const scoutingApp = {
   title: 'Scouting Apps',
   buttons: [
-    { text: 'Match Scout', link: '/scoutingapp/match'},
-    { text: 'Strategic Scout', link: '/scoutingapp/strategic'},
-    { text: 'Pit Scout', link: '/scoutingapp/pit'},
-    { text: 'Data Lookup', link: '/scoutingapp/lookup'},
-    { text: 'Picklists', link: '/scoutingapp/picklists'},
+    {text: 'Match Scout', link: '/scoutingapp/match', style: 'mainbutton'},
+    {text: 'Strategic Scout', link: '/scoutingapp/strategic', style: 'mainbutton'},
+    {text: 'Pit Scout', link: '/scoutingapp/pit', style: 'mainbutton'},
+    {text: 'Data Lookup', link: '/scoutingapp/lookup', style: 'mainbutton'},
+    {text: 'Picklists', link: '/scoutingapp/picklists', style: 'mainbutton'},
+    {text: 'Back', link: '/', style: 'backbutton'},
   ]
 }
 export default function App() {

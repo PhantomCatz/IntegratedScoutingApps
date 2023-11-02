@@ -1,10 +1,11 @@
 import '../public/stylesheets/home.css';
+import '../public/stylesheets/buttons.css';
 import logo from '../public/images/logo.png';
 import { Button } from 'antd';
 
 interface Props {
   title: string;
-  buttons: { text: string, link: string }[];
+  buttons: { text: string, link: string, style: string }[];
 }
 
 function homePage(props: Props) {
@@ -18,7 +19,7 @@ function homePage(props: Props) {
       </div>
       <div className='body'>
         {props.buttons.map((button, index) => (
-            <Button key={index} href={button.link}>{button.text}</Button>
+            <Button className={button.style} key={index} href={button.link}>{button.text}</Button>
           ))}
       </div> 
     </body>
