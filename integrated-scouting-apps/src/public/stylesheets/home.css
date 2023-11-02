@@ -1,0 +1,33 @@
+/**
+ * @author Nathan Kwok, add more...
+ * @since 2023-10-29
+ * @version 1.0.0
+ * @description CSS for the home page
+ */
+
+@font-face {
+    font-family: Audiowide;
+    src: url('../fonts/Audiowide-Regular.woff') format('woff');
+}
+body {
+    margin: 0;
+}
+h1 {
+    margin: 0;
+    font-family: Audiowide;
+    font-size: 44px;
+    color: #ffffff;
+    display: inline-block;
+}
+.banner {
+    background-color: #32a7dc;
+    text-align: center;
+    padding-top: 2%;
+    padding-bottom: 2%;
+}
+.body {
+    background-color: #ffffff;
+    color: #000000;
+    text-align: center;
+    height: 100vh;
+}
