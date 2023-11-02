@@ -12,7 +12,7 @@ const items: TabsProps['items'] = [
     {
       key: '2',
       label: 'Auton',
-      children: 'robin gay',
+      children: 'testing the gp of robin',
     },
     {
       key: '3',
@@ -28,12 +28,13 @@ const items: TabsProps['items'] = [
 
 function preMatch() {
     const items: MenuProps['items'] = [
-        {label: "R1", key: '0'},
-        {label: "R2", key: '1'},
-        {label: "R3", key: '3'},
-        {label: "B1", key: '4'},
-        {label: "B2", key: '5'},
-        {label: "B3", key: '6'},
+        {label: "Qualifications", key: '0'},
+        {label: "Round 1", key: '1'},
+        {label: "Round 2", key: '2'},
+        {label: "Round 3", key: '3'},
+        {label: "Round 4", key: '4'},
+        {label: "Round 5", key: '5'},
+        {label: "Finals", key: '6'},
     ];
     return (
         <div>
@@ -41,7 +42,7 @@ function preMatch() {
             <Input placeholder="NK" maxLength={2}/>
             <br></br>
             <p>Event Name</p>
-            <Input placeholder="juwon is very gay"/>
+            <Input placeholder="juwon is very home of six"/>
             <br></br>
             <p>Match Level</p>
             <Dropdown menu={{ items }} trigger={['click']}>
@@ -56,6 +57,9 @@ function preMatch() {
             </div>
         </div>
     );
+}
+function autonMatch() {
+
 }
 function homePage() {
   return (

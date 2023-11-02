@@ -1,4 +1,5 @@
 import '../public/stylesheets/home.css';
+import '../public/stylesheets/buttons.css';
 import logo from '../public/images/logo.png';
 
 function homePage() {
