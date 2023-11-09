@@ -39,10 +39,10 @@ function preMatch() {
     return (
         <div>
             <p>Scouter Initials</p>
-            <Input placeholder="NK" maxLength={2}/>
+            <Input placeholder="Scouter Initials" maxLength={2}/>
             <br></br>
             <p>Event Name</p>
-            <Input placeholder="juwon is very home of six"/>
+            <Input placeholder="2023cass" disabled={true}/>
             <br></br>
             <p>Match Level</p>
             <Dropdown menu={{ items }} trigger={['click']}>
