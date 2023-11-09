@@ -7,7 +7,7 @@ function homePage() {
     <body>
       <div className='banner'>
         <header>
-          <img src={logo} style={{height: 64 + 'px'}}></img>
+          <img src={logo} style={{height: 64 + 'px'}} alt=''></img>
           <h1>Strategy Apps</h1>
         </header>
       </div>

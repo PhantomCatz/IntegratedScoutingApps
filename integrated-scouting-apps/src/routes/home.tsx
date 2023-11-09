@@ -3,24 +3,19 @@ import '../public/stylesheets/buttons.css';
 import logo from '../public/images/logo.png';
 import { Button } from 'antd';
 
-interface Props {
-  title: string;
-  buttons: { text: string, link: string, style: string }[];
-}
-
-function homePage(props: Props) {
+function homePage() {
   return (
     <body>
       <div className='banner'>
         <header>
-          <img src={logo} style={{height: 64 + 'px'}}></img>
-          <h1>{props.title}</h1>
+          <img src={logo} style={{height: 64 + 'px'}} alt=''></img>
+          <h1>Strategy Apps</h1>
         </header>
       </div>
       <div className='body'>
-        {props.buttons.map((button, index) => (
-            <Button className={button.style} key={index} href={button.link}>{button.text}</Button>
-          ))}
+        <Button className='mainbutton' href='/scoutingapp'>Scouting App</Button>
+        <br></br>
+        <Button className='mainbutton' href='/dtf'>Drive Team Feeder</Button>
       </div> 
     </body>
   );
