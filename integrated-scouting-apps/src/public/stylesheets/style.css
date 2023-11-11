@@ -31,3 +31,7 @@ h1 {
     text-align: center;
     height: 100vh;
 }
+.matchbody {
+    padding-left: 25%;
+    padding-right: 25%;
+}

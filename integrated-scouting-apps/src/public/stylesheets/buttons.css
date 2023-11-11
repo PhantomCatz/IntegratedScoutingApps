@@ -24,3 +24,7 @@
     margin: 2% 1%;
     cursor: pointer;
 }
+.input {
+    min-width: 100px;
+    width: 100px;
+}
