@@ -9,7 +9,6 @@ import HomePage from './routes/home';
 import ScoutingApp from './routes/scoutingapp';
 import MatchScout from './routes/match';
 import DTF from './routes/dtf'; 
-import DTF from './routes/dtf';
 import StrategicScout from './routes/strategic';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
