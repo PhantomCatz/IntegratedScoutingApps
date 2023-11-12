@@ -8,8 +8,13 @@ import ReactDOM from 'react-dom/client';
 import HomePage from './routes/home';
 import ScoutingApp from './routes/scoutingapp';
 import MatchScout from './routes/match';
+<<<<<<< HEAD
 import DTF from './routes/dtf'; 
 //import StrategicScout from './routes/strategic';
+=======
+import DTF from './routes/dtf';
+import StrategicScout from './routes/strategic';
+>>>>>>> 1550d5f871fcadee568c0397ce6de5250c064265
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 export default function App() {
@@ -20,6 +25,7 @@ export default function App() {
         <Route path="/scoutingapp" element={<ScoutingApp />} />
         <Route path="/dtf" element={<DTF />} />
         <Route path="/scoutingapp/match" element={<MatchScout />} />
+        <Route path="/scoutingapp/strategic" element={<StrategicScout />} />
       </Routes>
     </BrowserRouter>
   );
