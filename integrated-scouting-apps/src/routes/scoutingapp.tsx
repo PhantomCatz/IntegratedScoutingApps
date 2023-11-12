@@ -1,4 +1,4 @@
-import '../public/stylesheets/home.css';
+import '../public/stylesheets/style.css';
 import '../public/stylesheets/buttons.css';
 import logo from '../public/images/logo.png';
 import { Button } from 'antd';
