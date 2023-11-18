@@ -2,8 +2,10 @@ import '../public/stylesheets/style.css';
 import '../public/stylesheets/buttons.css';
 import logo from '../public/images/logo.png';
 import { Button } from 'antd';
+import { useEffect } from 'react';
 
-function homePage() {
+function HomePage(props: any) {
+  useEffect(() => document.title = props.title, [props.title]);
   return (
     <body>
       <div className='banner'>
@@ -21,4 +23,4 @@ function homePage() {
   );
 }
 
-export default homePage;
+export default HomePage;
