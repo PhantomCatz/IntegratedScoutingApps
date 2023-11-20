@@ -1,12 +1,20 @@
 import '../public/stylesheets/style.css';
 import '../public/stylesheets/buttons.css';
 import logo from '../public/images/logo.png';
+import { useEffect } from 'react';
 
-function homePage() {
+function DTF(props: any) {
+  useEffect(() => document.title = props.title, [props.title]);
   return (
+    //@Hyoungjun07 leave this here; it is the logo
+    <div className='banner'>
+        <header>
+          <img src={logo} style={{height: 64 + 'px'}} alt=''></img>
+          <h1>Drive Team Feeder</h1>
+        </header>
+    </div>
     // <Layout>
     //   <Header>
-         <p>hi</p>
     //   </Header>
     //   <Layout>
     //     <Sider>left sidebar</Sider>
@@ -18,4 +26,4 @@ function homePage() {
   );
 }
 
-export default homePage;
+export default DTF;

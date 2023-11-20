@@ -1,8 +1,8 @@
 import '../public/stylesheets/style.css';
 import '../public/stylesheets/buttons.css';
 import logo from '../public/images/logo.png';
-import { useState } from 'react';
-import { Tabs, Input, Form, Select, Checkbox, InputNumber, Flex } from 'antd';
+import { useEffect } from 'react';
+import { Tabs, Input, Form, Select } from 'antd';
 import type { TabsProps } from 'antd';
 
 function preMatch() {
@@ -57,9 +57,6 @@ function preMatch() {
   );
 }
 function AutonMatch() { //needs to be capitalized to have the dynamic field work
-  const [directUrls, setDirectUrls] = useState<string[]>([]);
-  let robotImages: any = {};
-
   type FieldType = {
     autonQuestion1?: string;
     autonQuestion2?: string;
@@ -90,9 +87,6 @@ function AutonMatch() { //needs to be capitalized to have the dynamic field work
 }
 
 function TeleopMatch() { //needs to be capitalized to have the dynamic field work
-  const [directUrls, setDirectUrls] = useState<string[]>([]);
-  let robotImages: any = {};
-
   type FieldType = {
     teleopQuestion1?: string;
     teleopQuestion2?: string;
@@ -145,43 +139,41 @@ function TeleopMatch() { //needs to be capitalized to have the dynamic field wor
   </div>
   );
 }
-
-
-  function strategicScout() {
-    const items: TabsProps['items'] = [
-      {
-        key: '1',
-        label: 'Pre',
-        children: preMatch(),
-      },
-      {
-        key: '2',
-        label: 'Auton',
-        children: AutonMatch(),
-      },
-      {
-        key: '3',
-        label: 'Teleop',
-        children: TeleopMatch(),
-      },
-    ];  
-    return (
-      <body>
-        <div className='banner'>
-          <header>
-            <img src={logo} style={{height: 64 + 'px'}} alt=''></img>
-            <h1>Strategic Scout</h1>
-          </header>
-        </div>
-        <Form
-        initialValues={
-          {eventname: '2023cass', }
-        }
-          >
-        <Tabs defaultActiveKey="1" items={items} />
-        </Form>
-      </body>
-    );
-  }
-
-  export default strategicScout;
+function StrategicScout(props: any) {
+  useEffect(() => document.title = props.title, [props.title]);
+  const items: TabsProps['items'] = [
+    {
+      key: '1',
+      label: 'Pre',
+      children: preMatch(),
+    },
+    {
+      key: '2',
+      label: 'Auton',
+      children: AutonMatch(),
+    },
+    {
+      key: '3',
+      label: 'Teleop',
+      children: TeleopMatch(),
+    },
+  ];  
+  return (
+    <body>
+      <div className='banner'>
+        <header>
+          <img src={logo} style={{height: 64 + 'px'}} alt=''></img>
+          <h1>Strategic Scout</h1>
+        </header>
+      </div>
+      <Form
+      initialValues={
+        {eventname: '2023cass'}
+      }
+        >
+      <Tabs defaultActiveKey="1" items={items} />
+      </Form>
+    </body>
+  );
+}
+export default StrategicScout;
