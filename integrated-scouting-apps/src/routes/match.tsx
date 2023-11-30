@@ -1,10 +1,8 @@
 import '../public/stylesheets/style.css';
-import '../public/stylesheets/buttons.css';
+import '../public/stylesheets/input.css';
 import logo from '../public/images/logo.png';
 import field_blue from '../public/images/field_blue.png';
 import field_red from '../public/images/field_red.png';
-import grid_blue from '../public/images/grid_blue.png';
-import grid_red from '../public/images/grid_red.png';
 import no_image from '../public/images/no_image.png';
 import { useState, useRef, useEffect } from 'react';
 import { Tabs, Input, Form, Select, Checkbox, InputNumber, Flex, Image, Button } from 'antd';
@@ -16,13 +14,14 @@ function MatchScout(props: any) {
   const [color, setColor] = useState(false);
   const [directUrls, setDirectUrls] = useState<string[]>([]);
   const [imageURI, setImageURI] = useState<string>();
+  const [teamNum, setTeamNum] = useState<string>();
   const canvasRef = useRef<ReactSketchCanvasRef>(null);
   useEffect(() => document.title = props.title, [props.title]);
 
   async function updateRobotInfo() {
     const display = document.getElementById('team');
     try {
-      const response = await fetch('https://www.thebluealliance.com/api/v3/match/' + form.getFieldValue('eventname') + "_" + form.getFieldValue('matchlevel') + form.getFieldValue('matchnum'),
+      const response = await fetch('https://www.thebluealliance.com/api/v3/match/2023cass_' + form.getFieldValue('matchlevel') + form.getFieldValue('matchnum'),
       {
         method: "GET",
         headers: {
@@ -55,180 +54,15 @@ function MatchScout(props: any) {
         }
       });
       if (display && display.innerHTML !== 'undefined' && team) {
-        display.innerHTML = (team as unknown as string).substring(3);
+        setTeamNum((team as unknown as string).substring(3));
+        display.innerHTML = teamNum || 'Team #';
       }
     }
     catch (error) {
       if (display) {
-        display.innerHTML = 'Invalid ' + error;
+        display.innerHTML = 'Invalid Input';
       }
     }
-  }
-  function piecesTab(color: boolean) {
-    type FieldType = {
-      //hybrid cone
-      h_cone?: string;
-      h_cube?: string;
-      super?: string;
-      
-      //miss or dropped cone/cube
-      miss_cone?: number;
-      miss_cube?: number;
-      drop_cone?: number;
-      drop_cube?: number;
-
-      //high cone nodes
-      ll_high_cone?: string;
-      lr_high_cone?: string;
-      ml_high_cone?: string;
-      mr_high_cone?: string;
-      rl_high_cone?: string;
-      rr_high_cone?: string;
-
-      //mid cone nodes
-      ll_mid_cone?: string;
-      lr_mid_cone?: string;
-      ml_mid_cone?: string;
-      mr_mid_cone?: string;
-      rl_mid_cone?: string;
-      rr_mid_cone?: string;
-
-      //high cube nodes
-      l_high_cube?: string;
-      m_high_cube?: string;
-      r_high_cube?: string;
-
-      //mid cube nodes
-      l_mid_cube?: string;
-      m_mid_cube?: string;
-      r_mid_cube?: string;
-
-      //low hybrid nodes
-      ll_low_hybrid?: string;
-      lm_low_hybrid?: string;
-      lr_low_hybrid?: string;
-      ml_low_hybrid?: string;
-      mm_low_hybrid?: string;
-      mr_low_hybrid?: string;
-      rl_low_hybrid?: string;
-      rm_low_hybrid?: string;
-      rr_low_hybrid?: string;
-    }
-    return (
-      <div>
-        <Form.Item<FieldType> label="Cone" name="h_cone" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> label="Cube" name="h_cube" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> label="Super" name="super" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> label="Missed Cones" name="miss_cone" rules={[{ required: true}]}>
-          <InputNumber min={0} placeholder='0'></InputNumber>
-        </Form.Item>
-        <Form.Item<FieldType> label="Missed Cubes" name="miss_cube" rules={[{ required: true}]}>
-          <InputNumber min={0} placeholder='0'></InputNumber>
-        </Form.Item>
-        <Form.Item<FieldType> label="Dropped Cones" name="drop_cone" rules={[{ required: true}]}>
-          <InputNumber min={0} placeholder='0'></InputNumber>
-        </Form.Item>
-        <Form.Item<FieldType> label="Dropped Cubes" name="drop_cube" rules={[{ required: true}]}>
-          <InputNumber min={0} placeholder='0'></InputNumber>
-        </Form.Item>
-        <div style={{position: 'relative'}}>
-          <img src={color ? grid_blue : grid_red} alt=''></img>
-          <div style={{position: 'absolute'}}>
-          <Form.Item<FieldType> name="ll_high_cone" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="lr_high_cone" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="ml_high_cone" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="mr_high_cone" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="rl_high_cone" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="rl_high_cone" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-
-        <Form.Item<FieldType> name="ll_mid_cone" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="lr_mid_cone" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="ml_mid_cone" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="mr_mid_cone" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="rl_mid_cone" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="rl_mid_cone" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-
-        <Form.Item<FieldType> name="l_high_cube" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="m_high_cube" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="r_high_cube" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-
-        <Form.Item<FieldType> name="l_mid_cube" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="m_mid_cube" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="r_mid_cube" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-
-        <Form.Item<FieldType> name="ll_low_hybrid" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="lm_low_hybrid" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="lr_low_hybrid" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="ml_low_hybrid" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="mm_low_hybrid" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="mr_low_hybrid" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="rl_low_hybrid" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="rm_low_hybrid" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-        <Form.Item<FieldType> name="rr_low_hybrid" rules={[{ required: true}]}>
-          <Checkbox></Checkbox>
-        </Form.Item>
-          </div>
-        </div>
-      </div>
-    )
   }
   function preMatch() {
     type FieldType = {
@@ -242,12 +76,9 @@ function MatchScout(props: any) {
       {label: "Finals", value: "f"},
     ];
     return (
-      <div>
+      <div style={{alignItems: 'center', textAlign: 'center'}}>
         <Form.Item<FieldType> name="initials" rules={[{ required: true, message: 'Please input your initials!' }]}>
-          <Input placeholder='Scouter Initials' maxLength={2} className='mainbutton'/>
-        </Form.Item>
-        <Form.Item<FieldType> name="eventname" rules={[{ required: true, message: 'Please input the event name!' }]}>
-          <Input placeholder='2023cass' className='mainbutton' onClick={updateRobotInfo}/>
+          <Input placeholder='NK' maxLength={2} className='mainbutton'/>
         </Form.Item>
         <Form.Item<FieldType> name="matchlevel" rules={[{ required: true, message: 'Please input the match level!' }]}>
             <Select placeholder='Match Level' options={rounds} className='matchlevel' onClick={updateRobotInfo}/>
@@ -257,10 +88,10 @@ function MatchScout(props: any) {
   }
   function AutonMatch() { //needs to be capitalized to have the dynamic field work
     type FieldType = {
-      died?: string;
+      autondied?: boolean;
       startingloc?: string;
-      docked?: string;
-      engaged?: string;
+      docked?: boolean;
+      engaged?: boolean;
       matchnum?: number;
       robotnum?: number;
     };
@@ -293,22 +124,16 @@ function MatchScout(props: any) {
         label: 'Path',
         children: PathTab(color),
       },
-      {
-        key: '2',
-        label: 'Pieces',
-        children: piecesTab(color),
-      },
     ];
     function PathTab(color: boolean) { //needs to be capitalized to have the dynamic field work
       return (
-        <div>
+        <div style={{alignContent: 'center'}}>
           <Button onClick={() => canvasRef.current?.undo()}>Undo</Button>
           <Button onClick={() => canvasRef.current?.redo()}>Redo</Button>
           <Button onClick={() => canvasRef.current?.clearCanvas()}>Clear</Button>
           <Button onClick={() => canvasRef.current?.exportImage('png').then(data => setImageURI(data))}>Export</Button>
           <ReactSketchCanvas
             ref={canvasRef}
-            style={{marginLeft: 10 + '%'}}
             height={color ? '577px' : '567px'}
             width={color ? '636px' : '634px'}
             strokeWidth={5}
@@ -325,28 +150,28 @@ function MatchScout(props: any) {
     return (
       <div className='matchbody'>
         <Flex align='flex-end' justify='space-between'>
-        <h2 id='team'>Team #</h2>
-        <Form.Item<FieldType> label="Match #" name="matchnum" rules={[{ required: true, message: 'Please input the match number!' }]}>
-          <InputNumber min={1} onChange={updateRobotInfo}/>
-        </Form.Item>
-        <Form.Item<FieldType> id="robotnum" label="Robot #" name="robotnum" rules={[{ required: true, message: 'Please input the robot number!' }]}>
-          <Select options={robotNum} className='input' onChange={async event => {
-            if (event) {
-              if (event.includes("red")) {
-                setColor(false);
-                canvasRef.current?.resetCanvas();
-              }
-              else {
-                setColor(true);
-                canvasRef.current?.resetCanvas();
-              }
-              updateRobotInfo();
-            }}}/>
-        </Form.Item>
+          <h2 id='team'>{teamNum}</h2>
+          <Form.Item<FieldType> label="Match #" name="matchnum" rules={[{ required: true, message: 'Please input the match number!' }]}>
+            <InputNumber min={1} onChange={updateRobotInfo}/>
+          </Form.Item>
+          <Form.Item<FieldType> id="robotnum" label="Robot #" name="robotnum" rules={[{ required: true, message: 'Please input the robot number!' }]}>
+            <Select options={robotNum} className='input' onChange={async event => {
+              if (event) {
+                if (event.includes("red")) {
+                  setColor(false);
+                  canvasRef.current?.resetCanvas();
+                }
+                else {
+                  setColor(true);
+                  canvasRef.current?.resetCanvas();
+                }
+                updateRobotInfo();
+              }}}/>
+          </Form.Item>
         </Flex>
         <Flex justify='space-between'>
           <Flex vertical align="flex-start">
-          <Form.Item<FieldType> label="Robot Died" name="died" rules={[{ required: true}]}>
+          <Form.Item<FieldType> label="Robot Died" name="autondied" rules={[{ required: true}]}>
             <Checkbox></Checkbox>
           </Form.Item>
           <Form.Item<FieldType> label="Starting Location" name="startingloc" rules={[{ required: true, message: 'Please input the starting location!' }]}>
@@ -365,7 +190,88 @@ function MatchScout(props: any) {
             </Image.PreviewGroup>
           </Flex>
         </Flex>
-        <Tabs defaultActiveKey="1" items={items} style={{border: 2 + 'px solid black'}}/>
+        <Tabs defaultActiveKey="1" items={items} style={{alignItems: 'center'}}/>
+      </div>
+    );
+  }
+  function teleopMatch() {
+    type FieldType = {
+      single?: boolean,
+      double?: boolean,
+      ground?: boolean,
+      teleopdied?: boolean,
+      defend?: boolean,
+      wasdefend?: boolean,
+      matchnum?: number,
+      robotnum?: number,
+    };
+    const robotNum = [
+      {
+        label: 'Red Alliance',
+        options: [
+          {label: "R1", value: "red_1"},
+          {label: "R2", value: "red_2"},
+          {label: "R3", value: 'red_3'},
+        ],
+      },
+      {
+        label: 'Blue Alliance',
+        options: [
+          {label: "B1", value: "blue_1"},
+          {label: "B2", value: "blue_2"},
+          {label: "B3", value: 'blue_3'},
+        ],
+      },
+    ];
+    return (
+      <div className='matchbody'>
+        <Flex align='flex-end' justify='space-between'>
+          <h2 id='team'>{teamNum}</h2>
+          <Form.Item<FieldType> label="Match #" name="matchnum" rules={[{ required: true, message: 'Please input the match number!' }]}>
+            <InputNumber min={1} onChange={updateRobotInfo}/>
+          </Form.Item>
+          <Form.Item<FieldType> id="robotnum" label="Robot #" name="robotnum" rules={[{ required: true, message: 'Please input the robot number!' }]}>
+            <Select options={robotNum} className='input' onChange={async event => {
+              if (event) {
+                if (event.includes("red")) {
+                  setColor(false);
+                  canvasRef.current?.resetCanvas();
+                }
+                else {
+                  setColor(true);
+                  canvasRef.current?.resetCanvas();
+                }
+                updateRobotInfo();
+              }}}/>
+          </Form.Item>
+        </Flex>
+        <Flex justify='space-between'>
+          <Flex vertical align="flex-start">
+          <Form.Item<FieldType> label="Single Substation" name="single" rules={[{ required: true}]}>
+            <Checkbox></Checkbox>
+          </Form.Item>
+          <Form.Item<FieldType> label="Double Substation" name="double" rules={[{ required: true}]}>
+            <Checkbox></Checkbox>
+          </Form.Item> 
+          <Form.Item<FieldType> label="Ground Intake" name="ground" rules={[{ required: true}]}>
+            <Checkbox></Checkbox>
+          </Form.Item>
+          <Form.Item<FieldType> label="Robot Died" name="teleopdied" rules={[{ required: true}]}>
+            <Checkbox></Checkbox>
+          </Form.Item>
+          <Form.Item<FieldType> label="Defended" name="defend" rules={[{ required: true}]}>
+            <Checkbox></Checkbox>
+          </Form.Item>
+          <Form.Item<FieldType> label="Was Defended" name="wasdefend" rules={[{ required: true}]}>
+            <Checkbox></Checkbox>
+          </Form.Item>
+          </Flex>
+          <Flex vertical align="flex-end">
+            <Image.PreviewGroup items={directUrls}>
+              <Image src={directUrls[0] !== null ? directUrls[0] : no_image} style={{height: 250 + 'px'}}/>
+            </Image.PreviewGroup>
+          </Flex>
+        </Flex>
       </div>
     );
   }
@@ -383,7 +289,7 @@ function MatchScout(props: any) {
     {
       key: '3',
       label: 'Teleop',
-      children: 'hi',
+      children: teleopMatch(),
     },
     {
       key: '4',
@@ -401,53 +307,24 @@ function MatchScout(props: any) {
       </div>
       <Form
         initialValues={{
-          died: false,
+          autondied: false,
           docked: false,
           engaged: false,
           h_cube: false,
           h_cone: false, 
           super: false,
 
-          miss_cone: false,
-          miss_cube: false,
-          drop_cone: false,
-          drop_cube: false,
-
-          ll_high_cone: false,
-          lr_high_cone: false,
-          ml_high_cone: false,
-          mr_high_cone: false,
-          rl_high_cone: false,
-          rr_high_cone: false,
-
-          ll_mid_cone: false,
-          lr_mid_cone: false,
-          ml_mid_cone: false,
-          mr_mid_cone: false,
-          rl_mid_cone: false,
-          rr_mid_cone: false,
-
-          l_high_cube: false,
-          m_high_cube: false,
-          r_high_cube: false,
-
-          l_mid_cube: false,
-          m_mid_cube: false,
-          r_mid_cube: false,
-
-          ll_low_hybrid: false,
-          lm_low_hybrid: false,
-          lr_low_hybrid: false,
-          ml_low_hybrid: false,
-          mm_low_hybrid: false,
-          mr_low_hybrid: false,
-          rl_low_hybrid: false,
-          rm_low_hybrid: false,
-          rr_low_hybrid: false,
+          single: false,
+          double: false,
+          ground: false,
+          teleopdied: false,
+          defend: false,
+          wasdefend: false,
         }}
         form={form}
+        onSubmitCapture={async event => await console.log(event)}
       >
-        <Tabs defaultActiveKey="1" items={items} />
+        <Tabs defaultActiveKey="1" items={items}/>
       </Form>
     </body>
   );
