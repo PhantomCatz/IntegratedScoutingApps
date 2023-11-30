@@ -1,5 +1,5 @@
 import '../public/stylesheets/style.css';
-import '../public/stylesheets/buttons.css';
+import '../public/stylesheets/input.css';
 import logo from '../public/images/logo.png';
 import { Button } from 'antd';
 import { useEffect } from 'react';
