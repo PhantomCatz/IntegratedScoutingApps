@@ -4,10 +4,14 @@ import logo from '../public/images/logo.png';
 import field_blue from '../public/images/field_blue.png';
 import field_red from '../public/images/field_red.png';
 import no_image from '../public/images/no_image.png';
+import grid_blue from '../public/images/grid_blue.png';
+import grid_red from '../public/images/grid_red.png';
 import { useState, useRef, useEffect } from 'react';
 import { Tabs, Input, Form, Select, Checkbox, InputNumber, Flex, Image, Button } from 'antd';
 import { ReactSketchCanvas, ReactSketchCanvasRef } from 'react-sketch-canvas';
 import type { TabsProps } from 'antd';
+import TextArea from 'antd/es/input/TextArea';
+import { redirect } from 'react-router-dom';
 
 function MatchScout(props: any) {
   const [form] = Form.useForm();
@@ -17,42 +21,43 @@ function MatchScout(props: any) {
   const [teamNum, setTeamNum] = useState<string>();
   const canvasRef = useRef<ReactSketchCanvasRef>(null);
   useEffect(() => document.title = props.title, [props.title]);
+  const eventname = "2023cass";
+  const year = new Date().getFullYear() - 1;
 
   async function updateRobotInfo() {
     const display = document.getElementById('team');
     try {
-      const response = await fetch('https://www.thebluealliance.com/api/v3/match/2023cass_' + form.getFieldValue('matchlevel') + form.getFieldValue('matchnum'),
-      {
-        method: "GET",
-        headers: {
-          'X-TBA-Auth-Key': process.env.REACT_APP_X_TBA_AUTH_KEY as string,
-        }
-      });
+      const response = await fetch('https://www.thebluealliance.com/api/v3/match/' + eventname + "_" + form.getFieldValue('matchlevel') + form.getFieldValue('matchnum'),
+        {
+          method: "GET",
+          headers: {
+            'X-TBA-Auth-Key': process.env.REACT_APP_TBA_AUTH_KEY as string,
+          }
+        });
       const data = await response.json();
       const team_color = form.getFieldValue('robotnum').substring(0, form.getFieldValue('robotnum').indexOf('_'));
       const team_num = form.getFieldValue('robotnum').substring(form.getFieldValue('robotnum').indexOf('_') + 1) - 1;
       const team = (data.alliances[team_color].team_keys[team_num] !== null ? data.alliances[team_color].team_keys[team_num] : 0);
-    
-      await fetch('https://www.thebluealliance.com/api/v3/team/'+ team + '/media/2022',
-      {
-        method: "GET",
-        headers: {
-          'X-TBA-Auth-Key': process.env.REACT_APP_X_TBA_AUTH_KEY as string,
-        }
-      }).then(response => response.json()).then(data => {
-        if (data.toString() !== '') {
-          setDirectUrls(Object.keys(data).map(key => 
-            (data as any)[key].direct_url).filter((url) => url !== null && url !== 'undefined' && url.length > 0)
-          );
-          console.log(data.toString() !== '' ? "has image" : "no image");
-        }
-        else {
-          setDirectUrls([no_image]);
-        }
-        if (directUrls.length === 0) {
-          setDirectUrls([no_image]);
-        }
-      });
+      await fetch('https://www.thebluealliance.com/api/v3/team/' + team + '/media/' + year,
+        {
+          method: "GET",
+          headers: {
+            'X-TBA-Auth-Key': process.env.REACT_APP_TBA_AUTH_KEY as string,
+          }
+        }).then(response => response.json()).then(data => {
+          if (data.toString() !== '') {
+            setDirectUrls(Object.keys(data).map(key =>
+              (data as any)[key].direct_url).filter((url) => url !== null && url !== 'undefined' && url.length > 0)
+            );
+            console.log(data);
+          }
+          else {
+            setDirectUrls([no_image]);
+          }
+          if (directUrls.length === 0) {
+            setDirectUrls([no_image]);
+          }
+        });
       if (display && display.innerHTML !== 'undefined' && team) {
         setTeamNum((team as unknown as string).substring(3));
         display.innerHTML = teamNum || 'Team #';
@@ -64,24 +69,28 @@ function MatchScout(props: any) {
       }
     }
   }
+  function PiecesTab(color: boolean) { //needs to be capitalized to have the dynamic field work
+    return (
+      <img src={color ? grid_blue : grid_red} style={{width: 636 + 'px'}} alt=''></img>
+    );
+  }
   function preMatch() {
     type FieldType = {
       initials?: string;
-      eventname?: string;
       matchlevel?: string;
     };
     const rounds = [
-      {label: "Qualifications", value: "qm"},
-      {label: "Elimination", value: "sf"},
-      {label: "Finals", value: "f"},
+      { label: "Qualifications", value: "qm" },
+      { label: "Elimination", value: "sf" },
+      { label: "Finals", value: "f" },
     ];
     return (
-      <div style={{alignItems: 'center', textAlign: 'center'}}>
+      <div style={{ alignItems: 'center', textAlign: 'center' }}>
         <Form.Item<FieldType> name="initials" rules={[{ required: true, message: 'Please input your initials!' }]}>
-          <Input placeholder='NK' maxLength={2} className='mainbutton'/>
+          <Input placeholder='NK' maxLength={2} className='mainbutton' />
         </Form.Item>
         <Form.Item<FieldType> name="matchlevel" rules={[{ required: true, message: 'Please input the match level!' }]}>
-            <Select placeholder='Match Level' options={rounds} className='matchlevel' onClick={updateRobotInfo}/>
+          <Select placeholder='Match Level' options={rounds} className='matchlevel' onChange={updateRobotInfo} />
         </Form.Item>
       </div>
     );
@@ -90,31 +99,31 @@ function MatchScout(props: any) {
     type FieldType = {
       autondied?: boolean;
       startingloc?: string;
-      docked?: boolean;
-      engaged?: boolean;
+      autondocked?: boolean;
+      autonengaged?: boolean;
       matchnum?: number;
       robotnum?: number;
     };
     const startingLoc = [
-      {label: "Left", value: "left"},
-      {label: "Middle", value: "middle"},
-      {label: "Right", value: 'right'},
+      { label: "Left", value: "left" },
+      { label: "Middle", value: "middle" },
+      { label: "Right", value: 'right' },
     ];
     const robotNum = [
       {
         label: 'Red Alliance',
         options: [
-          {label: "R1", value: "red_1"},
-          {label: "R2", value: "red_2"},
-          {label: "R3", value: 'red_3'},
+          { label: "R1", value: "red_1" },
+          { label: "R2", value: "red_2" },
+          { label: "R3", value: 'red_3' },
         ],
       },
       {
         label: 'Blue Alliance',
         options: [
-          {label: "B1", value: "blue_1"},
-          {label: "B2", value: "blue_2"},
-          {label: "B3", value: 'blue_3'},
+          { label: "B1", value: "blue_1" },
+          { label: "B2", value: "blue_2" },
+          { label: "B3", value: 'blue_3' },
         ],
       },
     ];
@@ -124,10 +133,15 @@ function MatchScout(props: any) {
         label: 'Path',
         children: PathTab(color),
       },
+      {
+        key: '2',
+        label: 'Pieces',
+        children: PiecesTab(color),
+      }
     ];
     function PathTab(color: boolean) { //needs to be capitalized to have the dynamic field work
       return (
-        <div style={{alignContent: 'center'}}>
+        <div style={{ alignContent: 'center' }}>
           <Button onClick={() => canvasRef.current?.undo()}>Undo</Button>
           <Button onClick={() => canvasRef.current?.redo()}>Redo</Button>
           <Button onClick={() => canvasRef.current?.clearCanvas()}>Clear</Button>
@@ -143,16 +157,16 @@ function MatchScout(props: any) {
             preserveBackgroundImageAspectRatio='xMidyMid meet'
             exportWithBackgroundImage={true}
           />
-          <Input disabled value={imageURI}></Input>
+          <Input disabled value={imageURI} name='URI'></Input>
         </div>
       );
-    };      
+    };
     return (
       <div className='matchbody'>
         <Flex align='flex-end' justify='space-between'>
           <h2 id='team'>{teamNum}</h2>
           <Form.Item<FieldType> label="Match #" name="matchnum" rules={[{ required: true, message: 'Please input the match number!' }]}>
-            <InputNumber min={1} onChange={updateRobotInfo}/>
+            <InputNumber min={1} onChange={updateRobotInfo} />
           </Form.Item>
           <Form.Item<FieldType> id="robotnum" label="Robot #" name="robotnum" rules={[{ required: true, message: 'Please input the robot number!' }]}>
             <Select options={robotNum} className='input' onChange={async event => {
@@ -166,31 +180,32 @@ function MatchScout(props: any) {
                   canvasRef.current?.resetCanvas();
                 }
                 updateRobotInfo();
-              }}}/>
+              }
+            }} />
           </Form.Item>
         </Flex>
         <Flex justify='space-between'>
-          <Flex vertical align="flex-start">
-          <Form.Item<FieldType> label="Robot Died" name="autondied" rules={[{ required: true}]}>
-            <Checkbox></Checkbox>
-          </Form.Item>
-          <Form.Item<FieldType> label="Starting Location" name="startingloc" rules={[{ required: true, message: 'Please input the starting location!' }]}>
-            <Select options={startingLoc} className='input'/>
-          </Form.Item> 
-          <Form.Item<FieldType> label="Docked" name="docked" rules={[{ required: true}]}>
-            <Checkbox></Checkbox>
-          </Form.Item>
-          <Form.Item<FieldType> label="Engaged" name="engaged" rules={[{ required: true}]}>
-            <Checkbox></Checkbox>
-          </Form.Item>
+          <Flex vertical align='flex-start'>
+            <Form.Item<FieldType> label="Robot Died" name="autondied" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> label="Starting Location" name="startingloc" rules={[{ required: true, message: 'Please input the starting location!' }]}>
+              <Select options={startingLoc} className='input' />
+            </Form.Item>
+            <Form.Item<FieldType> label="Docked" name="autondocked" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> label="Engaged" name="autonengaged" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
           </Flex>
           <Flex vertical align="flex-end">
             <Image.PreviewGroup items={directUrls}>
-              <Image src={directUrls[0] !== null ? directUrls[0] : no_image} style={{height: 250 + 'px'}}/>
+              <Image src={directUrls[0] !== null ? directUrls[0] : no_image} style={{ height: 250 + 'px' }} />
             </Image.PreviewGroup>
           </Flex>
         </Flex>
-        <Tabs defaultActiveKey="1" items={items} style={{alignItems: 'center'}}/>
+        <Tabs defaultActiveKey="1" items={items} style={{ alignItems: 'center' }} />
       </div>
     );
   }
@@ -209,17 +224,17 @@ function MatchScout(props: any) {
       {
         label: 'Red Alliance',
         options: [
-          {label: "R1", value: "red_1"},
-          {label: "R2", value: "red_2"},
-          {label: "R3", value: 'red_3'},
+          { label: "R1", value: "red_1" },
+          { label: "R2", value: "red_2" },
+          { label: "R3", value: 'red_3' },
         ],
       },
       {
         label: 'Blue Alliance',
         options: [
-          {label: "B1", value: "blue_1"},
-          {label: "B2", value: "blue_2"},
-          {label: "B3", value: 'blue_3'},
+          { label: "B1", value: "blue_1" },
+          { label: "B2", value: "blue_2" },
+          { label: "B3", value: 'blue_3' },
         ],
       },
     ];
@@ -228,7 +243,7 @@ function MatchScout(props: any) {
         <Flex align='flex-end' justify='space-between'>
           <h2 id='team'>{teamNum}</h2>
           <Form.Item<FieldType> label="Match #" name="matchnum" rules={[{ required: true, message: 'Please input the match number!' }]}>
-            <InputNumber min={1} onChange={updateRobotInfo}/>
+            <InputNumber min={1} onChange={updateRobotInfo} />
           </Form.Item>
           <Form.Item<FieldType> id="robotnum" label="Robot #" name="robotnum" rules={[{ required: true, message: 'Please input the robot number!' }]}>
             <Select options={robotNum} className='input' onChange={async event => {
@@ -242,38 +257,143 @@ function MatchScout(props: any) {
                   canvasRef.current?.resetCanvas();
                 }
                 updateRobotInfo();
-              }}}/>
+              }
+            }} />
           </Form.Item>
         </Flex>
         <Flex justify='space-between'>
-          <Flex vertical align="flex-start">
-          <Form.Item<FieldType> label="Single Substation" name="single" rules={[{ required: true}]}>
-            <Checkbox></Checkbox>
-          </Form.Item>
-          <Form.Item<FieldType> label="Double Substation" name="double" rules={[{ required: true}]}>
-            <Checkbox></Checkbox>
-          </Form.Item> 
-          <Form.Item<FieldType> label="Ground Intake" name="ground" rules={[{ required: true}]}>
-            <Checkbox></Checkbox>
-          </Form.Item>
-          <Form.Item<FieldType> label="Robot Died" name="teleopdied" rules={[{ required: true}]}>
-            <Checkbox></Checkbox>
-          </Form.Item>
-          <Form.Item<FieldType> label="Defended" name="defend" rules={[{ required: true}]}>
-            <Checkbox></Checkbox>
-          </Form.Item>
-          <Form.Item<FieldType> label="Was Defended" name="wasdefend" rules={[{ required: true}]}>
-            <Checkbox></Checkbox>
-          </Form.Item>
+          <Flex vertical align='flex-start'>
+            <Form.Item<FieldType> label="Single Substation" name="single" rules={[{ required: true }]}>
+              <Button>fuck off</Button>
+            </Form.Item>
+            <Form.Item<FieldType> label="Double Substation" name="double" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> label="Ground Intake" name="ground" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> label="Robot Died" name="teleopdied" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> label="Defended" name="defend" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> label="Was Defended" name="wasdefend" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
           </Flex>
           <Flex vertical align="flex-end">
             <Image.PreviewGroup items={directUrls}>
-              <Image src={directUrls[0] !== null ? directUrls[0] : no_image} style={{height: 250 + 'px'}}/>
+              <Image src={directUrls[0] !== null ? directUrls[0] : no_image} style={{ height: 250 + 'px' }} />
             </Image.PreviewGroup>
           </Flex>
         </Flex>
       </div>
     );
+  }
+  function endMatch() {
+    type FieldType = {
+      enddied?: boolean;
+      startingloc?: string;
+      enddocked?: boolean;
+      endengaged?: boolean;
+      parked?: boolean;
+      matchnum?: number;
+      robotnum?: number;
+      intake?: number;
+      countdefense?: number;
+      defense?: number;
+      driver?: number;
+      penalty?: string;
+      comments?: string;
+    };
+    const robotNum = [
+      {
+        label: 'Red Alliance',
+        options: [
+          { label: "R1", value: "red_1" },
+          { label: "R2", value: "red_2" },
+          { label: "R3", value: 'red_3' },
+        ],
+      },
+      {
+        label: 'Blue Alliance',
+        options: [
+          { label: "B1", value: "blue_1" },
+          { label: "B2", value: "blue_2" },
+          { label: "B3", value: 'blue_3' },
+        ],
+      },
+    ];
+    return (
+      <div className='matchbody'>
+        <Flex align='flex-end' justify='space-between'>
+          <h2 id='team'>{teamNum}</h2>
+          <Form.Item<FieldType> label="Match #" name="matchnum" rules={[{ required: true, message: 'Please input the match number!' }]}>
+            <InputNumber min={1} onChange={updateRobotInfo} />
+          </Form.Item>
+          <Form.Item<FieldType> id="robotnum" label="Robot #" name="robotnum" rules={[{ required: true, message: 'Please input the robot number!' }]}>
+            <Select options={robotNum} className='input' onChange={async event => {
+              if (event) {
+                if (event.includes("red")) {
+                  setColor(false);
+                  canvasRef.current?.resetCanvas();
+                }
+                else {
+                  setColor(true);
+                  canvasRef.current?.resetCanvas();
+                }
+                updateRobotInfo();
+              }
+            }} />
+          </Form.Item>
+        </Flex>
+        <Flex justify='space-between'>
+          <Flex vertical align='flex-start'>
+            <Form.Item<FieldType> label="Robot Died" name="enddied" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> label="Docked" name="enddocked" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> label="Engaged" name="endengaged" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> label="Parked" name="parked" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+          </Flex>
+          <Flex vertical align="flex-end">
+            <Image.PreviewGroup items={directUrls}>
+              <Image src={directUrls[0] !== null ? directUrls[0] : no_image} style={{ height: 250 + 'px' }} />
+            </Image.PreviewGroup>
+          </Flex>
+        </Flex>
+        <Flex justify='space-between'>
+          <Flex vertical align='flex-start'>
+            <Form.Item<FieldType> label="Intake Speed" name="intake" rules={[{ required: true, message: 'Please input the intake speed!' }]}>
+              <InputNumber min={0} max={4} />
+            </Form.Item>
+            <Form.Item<FieldType> label="Counterdefense" name="countdefense" rules={[{ required: true, message: 'Please input the counterdefense!' }]}>
+              <InputNumber min={0} max={4} />
+            </Form.Item>
+          </Flex>
+          <Flex vertical align='flex-end'>
+            <Form.Item<FieldType> label="Defense" name="defense" rules={[{ required: true, message: 'Please input the defense!' }]}>
+              <InputNumber min={0} max={4} />
+            </Form.Item>
+            <Form.Item<FieldType> label="Driver Skill" name="driver" rules={[{ required: true, message: 'Please input the driver skill!' }]}>
+              <InputNumber min={0} max={4} />
+            </Form.Item>
+          </Flex>
+        </Flex>
+        <TextArea style={{resize: 'none', height: 100 + 'px'}} placeholder='Penalties Occured' maxLength={100} showCount name='penalty'></TextArea>
+        <br></br>
+        <TextArea style={{resize: 'none', height: 100 + 'px'}} placeholder='Comments' maxLength={100} showCount name='comments'></TextArea>
+        <br></br>
+        <input type="submit" value="Submit" style={{border: 2 + 'px solid black', textAlign: 'center', marginLeft: 45 + '%'}} className='input'></input>
+      </div>
+    )
   }
   const items: TabsProps['items'] = [
     {
@@ -294,14 +414,77 @@ function MatchScout(props: any) {
     {
       key: '4',
       label: 'End',
-      children: <input type="submit" value="Submit" onClick={(event) => console.log(event)}></input>,
+      children: endMatch(),
     },
   ];
+  async function setNewMatchScout(event: any) {
+    const body = {
+      "matchIdentifier": {
+        "Initials": event.initials,
+        "Robot": event.robotnum,
+        "match_event": eventname,
+        "match_level": event.matchlevel,
+        "match_number": event.matchnum,
+        "team_number": teamNum,
+      },
+      "auto": {
+        "auto_total_points": 0,
+        "auto_cones_scored": 0,
+        "auto_missed_cone": 0,
+        "auto_cubes_scored": 0,
+        "auto_missed_cube": 0,
+        "auto_mobility": event.autonpath,
+        "auto_start_location": event.startingloc,
+        "auto_piecePickedUp": 0,
+        "auto_docked": event.autondocked,
+        "auto_engaged": event.autonengaged,
+        "autonPath": event.URI,
+      },
+      "teleop": {
+        "T_total_points": 0,
+        "T_missed_cone": 0,
+        "T_cones_scored": 0,
+        "T_missed_cube": 0,
+        "T_cubes_scored": 0,
+        "T_docked": event.enddocked,
+        "T_engaged": event.endengaged,
+        "T_parked": event.parked
+      },
+      "overall": {
+        "counter_defense": event.countdefense,
+        "intakeGround": event.ground,
+        "intakeSingle": event.single,
+        "intakeDouble": event.double,
+        "robot_died": event.enddied,
+        "intake_speed": event.intake,
+        "comments": event.comments,
+        "dropped_pieces": 0,
+        "was_defended": event.wasdefend,
+        "superchargedNodes": 0,
+        "penaltiesIncurred": event.penalty,
+      }
+    };
+    try {
+      await fetch(process.env.REACT_APP_FIREBASE_URL as string, {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: {
+          "Access-Control-Request-Headers":"Content-Type, Origin",
+          "Content-Type":"application/json",
+          "Origin":"localhost:3000",
+        }
+      }).then(response => response.json()).then(data => console.log(data));
+      redirect('./match');
+  }
+  catch (err) {
+    console.log(err);
+  }
+};
   return (
     <body>
       <div className='banner'>
         <header>
-          <img src={logo} style={{height: 64 + 'px'}} alt=''></img>
+          <img src={logo} style={{ height: 64 + 'px' }} alt=''></img>
           <h1>Match Scout</h1>
         </header>
       </div>
@@ -311,8 +494,10 @@ function MatchScout(props: any) {
           docked: false,
           engaged: false,
           h_cube: false,
-          h_cone: false, 
+          h_cone: false,
           super: false,
+          autondocked: false,
+          autonengaged: false,
 
           single: false,
           double: false,
@@ -320,11 +505,23 @@ function MatchScout(props: any) {
           teleopdied: false,
           defend: false,
           wasdefend: false,
+
+          enddied: false,
+          enddocked: false,
+          endengaged: false,
+          parked: false,
         }}
         form={form}
-        onSubmitCapture={async event => await console.log(event)}
+        onFinish={event => {
+          try {
+            setNewMatchScout(event);
+          }
+          catch (err) {
+            console.log(err);
+          }
+        }}
       >
-        <Tabs defaultActiveKey="1" items={items}/>
+        <Tabs defaultActiveKey="1" items={items} />
       </Form>
     </body>
   );
