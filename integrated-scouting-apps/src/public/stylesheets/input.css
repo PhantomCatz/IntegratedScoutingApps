@@ -12,7 +12,7 @@
     cursor: pointer;
 }
 .backbutton {
-    background-color: #999999ff;
+    background-color: #999999;
     color: #000000;
     border: 2px solid black;
     border-radius: 15px;
@@ -49,10 +49,17 @@
     cursor: pointer;
     max-width: 25%;
 }
-.ant-select-selection {
-    background-color: #000000;
-}
 .input {
     min-width: 100px;
     width: 100px;
+}
+.checkbox {    
+    .ant-checkbox .ant-checkbox-inner {
+        background-color: #999999;
+        border-color: #000000;
+      } 
+    .ant-checkbox-checked .ant-checkbox-inner {
+        background-color: #61f761;
+        border-color: #000000;
+    }
 }

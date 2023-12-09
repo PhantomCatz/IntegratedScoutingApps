@@ -6,19 +6,18 @@ import field_red from '../public/images/field_red.png';
 import no_image from '../public/images/no_image.png';
 import grid_blue from '../public/images/grid_blue.png';
 import grid_red from '../public/images/grid_red.png';
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Tabs, Input, Form, Select, Checkbox, InputNumber, Flex, Image, Button } from 'antd';
 import { ReactSketchCanvas, ReactSketchCanvasRef } from 'react-sketch-canvas';
 import type { TabsProps } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
-import { redirect } from 'react-router-dom';
 
 function MatchScout(props: any) {
   const [form] = Form.useForm();
-  const [color, setColor] = useState(false);
-  const [directUrls, setDirectUrls] = useState<string[]>([]);
-  const [imageURI, setImageURI] = useState<string>();
-  const [teamNum, setTeamNum] = useState<string>();
+  const color = useRef(false);
+  const [directURL, setDirectURL] = useState<string[]>([]);
+  const imageURI = useRef<string>();
+  const teamNum = useRef<number>(2637);
   const canvasRef = useRef<ReactSketchCanvasRef>(null);
   useEffect(() => document.title = props.title, [props.title]);
   const eventname = "2023cass";
@@ -44,23 +43,18 @@ function MatchScout(props: any) {
           headers: {
             'X-TBA-Auth-Key': process.env.REACT_APP_TBA_AUTH_KEY as string,
           }
-        }).then(response => response.json()).then(data => {
+        }).then(response => response.json()).then(async data => {
           if (data.toString() !== '') {
-            setDirectUrls(Object.keys(data).map(key =>
-              (data as any)[key].direct_url).filter((url) => url !== null && url !== 'undefined' && url.length > 0)
-            );
+            setDirectURL(Object.keys(data).map(key => (data as any)[key].direct_url).filter((url) => url !== null && url !== 'undefined' && url.length > 0));
             console.log(data);
           }
           else {
-            setDirectUrls([no_image]);
-          }
-          if (directUrls.length === 0) {
-            setDirectUrls([no_image]);
+            setDirectURL([no_image]);
           }
         });
       if (display && display.innerHTML !== 'undefined' && team) {
-        setTeamNum((team as unknown as string).substring(3));
-        display.innerHTML = teamNum || 'Team #';
+        teamNum.current = parseInt((team as unknown as string).substring(3));
+        display.innerHTML = teamNum.current.toString();
       }
     }
     catch (error) {
@@ -86,6 +80,7 @@ function MatchScout(props: any) {
     ];
     return (
       <div style={{ alignItems: 'center', textAlign: 'center' }}>
+        <h2 style={{textAlign: 'left', paddingLeft: 40 + '%'}}>Scouter Initials</h2>
         <Form.Item<FieldType> name="initials" rules={[{ required: true, message: 'Please input your initials!' }]}>
           <Input placeholder='NK' maxLength={2} className='mainbutton' />
         </Form.Item>
@@ -131,12 +126,12 @@ function MatchScout(props: any) {
       {
         key: '1',
         label: 'Path',
-        children: PathTab(color),
+        children: PathTab(color.current),
       },
       {
         key: '2',
         label: 'Pieces',
-        children: PiecesTab(color),
+        children: PiecesTab(color.current),
       }
     ];
     function PathTab(color: boolean) { //needs to be capitalized to have the dynamic field work
@@ -145,7 +140,6 @@ function MatchScout(props: any) {
           <Button onClick={() => canvasRef.current?.undo()}>Undo</Button>
           <Button onClick={() => canvasRef.current?.redo()}>Redo</Button>
           <Button onClick={() => canvasRef.current?.clearCanvas()}>Clear</Button>
-          <Button onClick={() => canvasRef.current?.exportImage('png').then(data => setImageURI(data))}>Export</Button>
           <ReactSketchCanvas
             ref={canvasRef}
             height={color ? '577px' : '567px'}
@@ -157,14 +151,14 @@ function MatchScout(props: any) {
             preserveBackgroundImageAspectRatio='xMidyMid meet'
             exportWithBackgroundImage={true}
           />
-          <Input disabled value={imageURI} name='URI'></Input>
+          <Input disabled value={imageURI.current} name='URI'></Input>
         </div>
       );
     };
     return (
       <div className='matchbody'>
         <Flex align='flex-end' justify='space-between'>
-          <h2 id='team'>{teamNum}</h2>
+          <h2 id='team'>{teamNum.current}</h2>
           <Form.Item<FieldType> label="Match #" name="matchnum" rules={[{ required: true, message: 'Please input the match number!' }]}>
             <InputNumber min={1} onChange={updateRobotInfo} />
           </Form.Item>
@@ -172,14 +166,14 @@ function MatchScout(props: any) {
             <Select options={robotNum} className='input' onChange={async event => {
               if (event) {
                 if (event.includes("red")) {
-                  setColor(false);
+                  color.current = false;
                   canvasRef.current?.resetCanvas();
                 }
                 else {
-                  setColor(true);
+                  color.current = true;
                   canvasRef.current?.resetCanvas();
                 }
-                updateRobotInfo();
+                await updateRobotInfo();
               }
             }} />
           </Form.Item>
@@ -187,21 +181,21 @@ function MatchScout(props: any) {
         <Flex justify='space-between'>
           <Flex vertical align='flex-start'>
             <Form.Item<FieldType> label="Robot Died" name="autondied" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
             <Form.Item<FieldType> label="Starting Location" name="startingloc" rules={[{ required: true, message: 'Please input the starting location!' }]}>
               <Select options={startingLoc} className='input' />
             </Form.Item>
             <Form.Item<FieldType> label="Docked" name="autondocked" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
             <Form.Item<FieldType> label="Engaged" name="autonengaged" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
           </Flex>
           <Flex vertical align="flex-end">
-            <Image.PreviewGroup items={directUrls}>
-              <Image src={directUrls[0] !== null ? directUrls[0] : no_image} style={{ height: 250 + 'px' }} />
+            <Image.PreviewGroup items={directURL}>
+              <Image src={directURL[0]} style={{ height: 250 + 'px'}} />
             </Image.PreviewGroup>
           </Flex>
         </Flex>
@@ -241,7 +235,7 @@ function MatchScout(props: any) {
     return (
       <div className='matchbody'>
         <Flex align='flex-end' justify='space-between'>
-          <h2 id='team'>{teamNum}</h2>
+          <h2 id='team'>{teamNum.current}</h2>
           <Form.Item<FieldType> label="Match #" name="matchnum" rules={[{ required: true, message: 'Please input the match number!' }]}>
             <InputNumber min={1} onChange={updateRobotInfo} />
           </Form.Item>
@@ -249,11 +243,11 @@ function MatchScout(props: any) {
             <Select options={robotNum} className='input' onChange={async event => {
               if (event) {
                 if (event.includes("red")) {
-                  setColor(false);
+                  color.current = false;
                   canvasRef.current?.resetCanvas();
                 }
                 else {
-                  setColor(true);
+                  color.current = true;
                   canvasRef.current?.resetCanvas();
                 }
                 updateRobotInfo();
@@ -264,27 +258,27 @@ function MatchScout(props: any) {
         <Flex justify='space-between'>
           <Flex vertical align='flex-start'>
             <Form.Item<FieldType> label="Single Substation" name="single" rules={[{ required: true }]}>
-              <Button>fuck off</Button>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
             <Form.Item<FieldType> label="Double Substation" name="double" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
             <Form.Item<FieldType> label="Ground Intake" name="ground" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
             <Form.Item<FieldType> label="Robot Died" name="teleopdied" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
             <Form.Item<FieldType> label="Defended" name="defend" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
             <Form.Item<FieldType> label="Was Defended" name="wasdefend" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
           </Flex>
           <Flex vertical align="flex-end">
-            <Image.PreviewGroup items={directUrls}>
-              <Image src={directUrls[0] !== null ? directUrls[0] : no_image} style={{ height: 250 + 'px' }} />
+            <Image.PreviewGroup items={directURL}>
+              <Image src={directURL[0] !== null ? directURL[0] : no_image} style={{ height: 250 + 'px' }} />
             </Image.PreviewGroup>
           </Flex>
         </Flex>
@@ -328,7 +322,7 @@ function MatchScout(props: any) {
     return (
       <div className='matchbody'>
         <Flex align='flex-end' justify='space-between'>
-          <h2 id='team'>{teamNum}</h2>
+          <h2 id='team'>{teamNum.current}</h2>
           <Form.Item<FieldType> label="Match #" name="matchnum" rules={[{ required: true, message: 'Please input the match number!' }]}>
             <InputNumber min={1} onChange={updateRobotInfo} />
           </Form.Item>
@@ -336,11 +330,11 @@ function MatchScout(props: any) {
             <Select options={robotNum} className='input' onChange={async event => {
               if (event) {
                 if (event.includes("red")) {
-                  setColor(false);
+                  color.current = false;
                   canvasRef.current?.resetCanvas();
                 }
                 else {
-                  setColor(true);
+                  color.current = true;
                   canvasRef.current?.resetCanvas();
                 }
                 updateRobotInfo();
@@ -351,21 +345,21 @@ function MatchScout(props: any) {
         <Flex justify='space-between'>
           <Flex vertical align='flex-start'>
             <Form.Item<FieldType> label="Robot Died" name="enddied" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
             <Form.Item<FieldType> label="Docked" name="enddocked" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
             <Form.Item<FieldType> label="Engaged" name="endengaged" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
             <Form.Item<FieldType> label="Parked" name="parked" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
           </Flex>
           <Flex vertical align="flex-end">
-            <Image.PreviewGroup items={directUrls}>
-              <Image src={directUrls[0] !== null ? directUrls[0] : no_image} style={{ height: 250 + 'px' }} />
+            <Image.PreviewGroup items={directURL}>
+              <Image src={directURL[0]} style={{ height: 250 + 'px' }} />
             </Image.PreviewGroup>
           </Flex>
         </Flex>
@@ -387,11 +381,9 @@ function MatchScout(props: any) {
             </Form.Item>
           </Flex>
         </Flex>
-        <TextArea style={{resize: 'none', height: 100 + 'px'}} placeholder='Penalties Occured' maxLength={100} showCount name='penalty'></TextArea>
-        <br></br>
+        <TextArea style={{resize: 'none', height: 100 + 'px', paddingBottom: 25 + 'px'}} placeholder='Penalties Occured' maxLength={100} showCount name='penalty'></TextArea>
         <TextArea style={{resize: 'none', height: 100 + 'px'}} placeholder='Comments' maxLength={100} showCount name='comments'></TextArea>
-        <br></br>
-        <input type="submit" value="Submit" style={{border: 2 + 'px solid black', textAlign: 'center', marginLeft: 45 + '%'}} className='input'></input>
+        <input type="submit" value="Submit" style={{border: 2 + 'px solid black', textAlign: 'center', alignSelf: 'center'}} className='input'></input>
       </div>
     )
   }
@@ -472,9 +464,9 @@ function MatchScout(props: any) {
           "Access-Control-Request-Headers":"Content-Type, Origin",
           "Content-Type":"application/json",
           "Origin":"localhost:3000",
+          "Database": "MatchScouting"
         }
       }).then(response => response.json()).then(data => console.log(data));
-      redirect('./match');
   }
   catch (err) {
     console.log(err);
@@ -512,9 +504,11 @@ function MatchScout(props: any) {
           parked: false,
         }}
         form={form}
-        onFinish={event => {
+        onFinish={async event => {
           try {
-            setNewMatchScout(event);
+            canvasRef.current?.exportImage('png').then(data => imageURI.current = data);
+            await setNewMatchScout(event);
+            window.location.reload();
           }
           catch (err) {
             console.log(err);
