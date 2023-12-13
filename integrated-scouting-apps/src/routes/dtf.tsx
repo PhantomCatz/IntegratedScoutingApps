@@ -2,16 +2,21 @@ import '../public/stylesheets/style.css';
 import '../public/stylesheets/input.css';
 import logo from '../public/images/logo.png';
 import { useEffect } from 'react';
+import { Button } from 'antd';
 
 function DTF(props: any) {
   useEffect(() => document.title = props.title, [props.title]);
   return (
     //@Hyoungjun07 leave this here; it is the logo
     <div className='banner'>
-        <header>
-          <img src={logo} style={{height: 64 + 'px'}} alt=''></img>
-          <h1>Drive Team Feeder</h1>
-        </header>
+      <header>
+        <img src={logo} style={{ height: 64 + 'px' }} alt=''></img>
+        <h1>Drive Team Feeder</h1>
+      </header>
+      <body>
+        <Button className='backButton' href='/' style={{ resize: 'none', marginRight: '93%' }}>Back</Button>
+      </body>
+
     </div>
     // <Layout>
     //   <Header>
