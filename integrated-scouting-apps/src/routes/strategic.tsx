@@ -8,6 +8,7 @@ import { redirect } from 'react-router-dom';
 
 function StrategicScout(props:any) 
 {
+  const [form]=Form.useForm();
   function preMatch() {
     type FieldType = {
       initials?: string;
@@ -79,7 +80,7 @@ function StrategicScout(props:any)
         <Form.Item<FieldType> name="autonQuestion1" rules={[{ required: true}]}>
           <Input/>
         </Form.Item>
-        <p>What was the robot'What was the robot's first move when the round started? starting position?</p>
+        <p>What was the robot's first move when the round started? starting position?</p>
         <Form.Item<FieldType> name="autonQuestion2" rules={[{ required: true}]}>
           <Input/>
         </Form.Item>
@@ -148,11 +149,11 @@ function StrategicScout(props:any)
         <Form.Item<FieldType> name="teleQuestion8" rules={[{ required: true}]}>
           <Input/>
         </Form.Item>
-        <p>Driver Skill Rating (1-4)</p>
+        <p>Did driver have good driving skill?</p>
         <Form.Item<FieldType> name="driverSkillRating" rules={[{ required: true}]}>
           <Input/>
         </Form.Item>
-        <p>Robot Speed (1-4)</p>
+        <p>How fast could the robot move?</p>
         <Form.Item<FieldType> name="robotSpeed" rules={[{ required: true}]}>
           <Input/>
         </Form.Item>
@@ -194,24 +195,24 @@ function StrategicScout(props:any)
         "team_number": event.teamnum,
       },
       "auto": {
-        "auto_q1": event.autonQuestion1,
-        "auto_q2": event.autonQuestion2,
-        "auto_q3": event.autonQuestion3,
-        "auto_q4": event.autonQuestion4,
-        "auto_q5": event.autonQuestion5,
+        "auto_starting_position": event.autonQuestion1,
+        "auto_robot_first_move": event.autonQuestion2,
+        "auto_robot_pickup_location": event.autonQuestion3,
+        "auto_robot_scoring_location": event.autonQuestion4,
+        "auto_robot_ending_location": event.autonQuestion5,
       },
       "teleop": {
-        "tele_q1": event.teleQuestion1,
-        "tele_q2": event.teleQuestion2,
-        "tele_q3": event.teleQuestion3,
-        "tele_q4": event.teleQuestion4,
-        "tele_q5": event.teleQuestion5,
-        "tele_q6": event.teleQuestion6,
-        "tele_q7": event.teleQuestion7,
-        "tele_q8": event.teleQuestion8,
-        "driver_skill": event.driverSkillRating,
-        "robot_speed": event.robotSpeed,
-        "comments": event.comments,
+        "T_robot_starting_location": event.teleQuestion1,
+        "T_robot_counter_defense": event.teleQuestion2,
+        "T_robot_community_entering_location": event.teleQuestion3,
+        "T_robot_entering_details": event.teleQuestion4,
+        "T_robot_ability_overChargeStation": event.teleQuestion5,
+        "T_robot_substation_usage": event.teleQuestion6,
+        "T_robot_balancing": event.teleQuestion7,
+        "T_robot_penalty_reason": event.teleQuestion8,
+        "T_driver_skill": event.driverSkillRating,
+        "T_robot_performance": event.robotSpeed,
+        "T_comments": event.comments,
       }
     };
     try {
@@ -222,6 +223,7 @@ function StrategicScout(props:any)
           "Access-Control-Request-Headers":"Content-Type, Origin",
           "Content-Type":"application/json",
           "Origin":"localhost:3000",
+          "Database":"StrategicScouting"
         }
       }).then(response => response.json()).then(data => console.log(data));
       redirect('./strategic');
@@ -229,7 +231,7 @@ function StrategicScout(props:any)
   catch (err) {
     console.log(err);
   }
-}
+};
     return (
       <body>
         <div className='banner'>
@@ -242,7 +244,16 @@ function StrategicScout(props:any)
         initialValues={
           {eventname: '2023cass'}
         }
-          >
+        form={form}
+        onFinish={event => {
+          try {
+            newStrategicScout(event);
+          }
+          catch (err) {
+            console.log(err);
+          }
+        }}
+      >
         <Tabs defaultActiveKey="1" items={items} />
         </Form>
       </body>
