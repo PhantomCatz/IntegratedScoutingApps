@@ -6,22 +6,21 @@ import field_red from '../public/images/field_red.png';
 import no_image from '../public/images/no_image.png';
 import grid_blue from '../public/images/grid_blue.png';
 import grid_red from '../public/images/grid_red.png';
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Tabs, Input, Form, Select, Checkbox, InputNumber, Flex, Image, Button } from 'antd';
 import { ReactSketchCanvas, ReactSketchCanvasRef } from 'react-sketch-canvas';
 import type { TabsProps } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
-import { redirect } from 'react-router-dom';
 
 function MatchScout(props: any) {
   const [form] = Form.useForm();
   const [color, setColor] = useState(false);
-  const [directUrls, setDirectUrls] = useState<string[]>([]);
-  const [imageURI, setImageURI] = useState<string>();
-  const [teamNum, setTeamNum] = useState<string>();
+  const [directURL, setDirectURL] = useState<string[]>([]);
+  const imageURI = useRef<string>();
+  const teamNum = useRef<number>(0);
   const canvasRef = useRef<ReactSketchCanvasRef>(null);
   useEffect(() => document.title = props.title, [props.title]);
-  const eventname = "2023cass";
+  const eventname = process.env.REACT_APP_EVENTNAME;
   const year = new Date().getFullYear() - 1;
 
   async function updateRobotInfo() {
@@ -44,23 +43,18 @@ function MatchScout(props: any) {
           headers: {
             'X-TBA-Auth-Key': process.env.REACT_APP_TBA_AUTH_KEY as string,
           }
-        }).then(response => response.json()).then(data => {
+        }).then(response => response.json()).then(async data => {
           if (data.toString() !== '') {
-            setDirectUrls(Object.keys(data).map(key =>
-              (data as any)[key].direct_url).filter((url) => url !== null && url !== 'undefined' && url.length > 0)
-            );
+            setDirectURL(Object.keys(data).map(key => (data as any)[key].direct_url).filter((url) => url !== null && url !== 'undefined' && url.length > 0));
             console.log(data);
           }
           else {
-            setDirectUrls([no_image]);
-          }
-          if (directUrls.length === 0) {
-            setDirectUrls([no_image]);
+            setDirectURL([no_image]);
           }
         });
       if (display && display.innerHTML !== 'undefined' && team) {
-        setTeamNum((team as unknown as string).substring(3));
-        display.innerHTML = teamNum || 'Team #';
+        teamNum.current = parseInt((team as unknown as string).substring(3));
+        display.innerHTML = teamNum.current.toString();
       }
     }
     catch (error) {
@@ -69,9 +63,206 @@ function MatchScout(props: any) {
       }
     }
   }
+  async function setNewMatchScout(event: any) {
+    const body = {
+      "matchIdentifier": {
+        "Initials": event.initials,
+        "Robot": event.robotnum,
+        "match_event": eventname,
+        "match_level": event.matchlevel,
+        "match_number": event.matchnum,
+        "team_number": teamNum,
+      },
+      "auto": {
+        "auto_total_points": 0,
+        "auto_cones_scored": 0,
+        "auto_missed_cone": 0,
+        "auto_cubes_scored": 0,
+        "auto_missed_cube": 0,
+        "auto_mobility": event.autonpath,
+        "auto_start_location": event.startingloc,
+        "auto_piecePickedUp": 0,
+        "auto_docked": event.autondocked,
+        "auto_engaged": event.autonengaged,
+        "autonPath": event.URI,
+      },
+      "teleop": {
+        "T_total_points": 0,
+        "T_missed_cone": 0,
+        "T_cones_scored": 0,
+        "T_missed_cube": 0,
+        "T_cubes_scored": 0,
+        "T_docked": event.enddocked,
+        "T_engaged": event.endengaged,
+        "T_parked": event.parked,
+        "T_ability_selfBalance": event.selfbalance,
+      },
+      "overall": {
+        "counter_defense": event.countdefense,
+        "intakeGround": event.ground,
+        "intakeSingle": event.single,
+        "intakeDouble": event.double,
+        "robot_died": event.enddied,
+        "intake_speed": event.intake,
+        "comments": event.comments,
+        "dropped_pieces": 0,
+        "was_defended": event.wasdefend,
+        "superchargedNodes": 0,
+        "penaltiesIncurred": event.penalty,
+      }
+    };
+    try {
+      await fetch(process.env.REACT_APP_FIREBASE_URL as string, {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: {
+          "Access-Control-Request-Headers": "Content-Type, Origin",
+          "Content-Type": "application/json",
+          "Origin": "localhost:3000",
+          "Database": "MatchScouting"
+        }
+      }).then(response => response.json()).then(data => console.log(data));
+    }
+    catch (err) {
+      console.log(err);
+    }
+  };
   function PiecesTab(color: boolean) { //needs to be capitalized to have the dynamic field work
+    type FieldType = {
+      ll_high?: boolean;
+      lm_highc?: boolean;
+      lr_high?: boolean;
+      ml_high?: boolean;
+      mm_highc?: boolean;
+      mr_high?: boolean;
+      rl_high?: boolean;
+      rm_highc?: boolean;
+      rr_high?: boolean;
+
+      ll_mid?: boolean;
+      lm_midc?: boolean;
+      lr_mid?: boolean;
+      ml_mid?: boolean;
+      mm_midc?: boolean;
+      mr_mid?: boolean;
+      rl_mid?: boolean;
+      rm_midc?: boolean;
+      rr_mid?: boolean;
+
+      ll_hybrid?: string;
+      lm_hybrid?: string;
+      lr_hybrid?: string;
+      ml_hybrid?: string;
+      mm_hybrid?: string;
+      mr_hybrid?: string;
+      rl_hybrid?: string;
+      rm_hybrid?: string;
+      rr_hybrid?: string;
+    };
+    const hybrid = [
+      {
+        options: [
+          {label: "None", value: "none"},
+          {label: "Cone", value: "cone"},
+          {label: "Cube", value: "cube"},
+          {label: "S. Cone", value: "supercone"},
+          {label: "S. Cube", value: "supercube"},
+        ],
+      },
+    ];
     return (
-      <img src={color ? grid_blue : grid_red} style={{width: 636 + 'px'}} alt=''></img>
+      <div>
+        <Flex vertical justify='space-between'>
+          <Flex align='flex-start' justify='space-between'>
+            <Form.Item<FieldType> name="ll_high" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> name="lm_highc" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> name="lr_high" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> name="ml_high" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> name="mm_highc" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> name="mr_high" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> name="rl_high" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> name="rm_highc" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> name="rr_high" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+          </Flex>
+          <Flex align='flex-start' justify='space-between'>
+            <Form.Item<FieldType> name="ll_mid" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> name="lm_midc" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> name="lr_mid" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> name="ml_mid" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> name="mm_midc" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> name="mr_mid" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> name="rl_mid" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> name="rm_midc" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> name="rr_mid" rules={[{ required: true }]}>
+              <Checkbox></Checkbox>
+            </Form.Item>
+          </Flex>
+          <Flex align='flex-start' justify='space-between'>
+            <Form.Item<FieldType> name="ll_hybrid" rules={[{ required: true }]}>
+              <Select options={hybrid} className="input" defaultValue="none" />
+            </Form.Item>
+            <Form.Item<FieldType> name="lm_hybrid" rules={[{ required: true }]}>
+              <Select options={hybrid} className="input" defaultValue="none" />
+            </Form.Item>
+            <Form.Item<FieldType> name="lr_hybrid" rules={[{ required: true }]}>
+              <Select options={hybrid} className="input" defaultValue="none" />
+            </Form.Item>
+            <Form.Item<FieldType> name="ml_hybrid" rules={[{ required: true }]}>
+              <Select options={hybrid} className="input" defaultValue="none" />
+            </Form.Item>
+            <Form.Item<FieldType> name="mm_hybrid" rules={[{ required: true }]}>
+              <Select options={hybrid} className="input" defaultValue="none" />
+            </Form.Item>
+            <Form.Item<FieldType> name="mr_hybrid" rules={[{ required: true }]}>
+              <Select options={hybrid} className="input" defaultValue="none" />
+            </Form.Item>
+            <Form.Item<FieldType> name="rl_hybrid" rules={[{ required: true }]}>
+              <Select options={hybrid} className="input" defaultValue="none" />
+            </Form.Item>
+            <Form.Item<FieldType> name="rm_hybrid" rules={[{ required: true }]}>
+              <Select options={hybrid} className="input" defaultValue="none" />
+            </Form.Item>
+            <Form.Item<FieldType> name="rr_hybrid" rules={[{ required: true }]}>
+              <Select options={hybrid} className="input" defaultValue="none" />
+            </Form.Item>
+          </Flex>
+        </Flex>
+        <img src={color ? grid_blue : grid_red} style={{ width: 636 + 'px', paddingBottom: 50 + 'px' }} alt=''></img>
+      </div>
     );
   }
   function preMatch() {
@@ -86,6 +277,7 @@ function MatchScout(props: any) {
     ];
     return (
       <div style={{ alignItems: 'center', textAlign: 'center' }}>
+        <h2 style={{ textAlign: 'left', paddingLeft: 40 + '%' }}>Scouter Initials</h2>
         <Form.Item<FieldType> name="initials" rules={[{ required: true, message: 'Please input your initials!' }]}>
           <Input placeholder='NK' maxLength={2} className='mainbutton' />
         </Form.Item>
@@ -142,14 +334,13 @@ function MatchScout(props: any) {
     function PathTab(color: boolean) { //needs to be capitalized to have the dynamic field work
       return (
         <div style={{ alignContent: 'center' }}>
-          <Button onClick={() => canvasRef.current?.undo()}>Undo</Button>
-          <Button onClick={() => canvasRef.current?.redo()}>Redo</Button>
-          <Button onClick={() => canvasRef.current?.clearCanvas()}>Clear</Button>
-          <Button onClick={() => canvasRef.current?.exportImage('png').then(data => setImageURI(data))}>Export</Button>
+          <Button onClick={() => canvasRef.current?.undo()} className='pathbutton'>Undo</Button>
+          <Button onClick={() => canvasRef.current?.redo()} className='pathbutton'>Redo</Button>
+          <Button onClick={() => canvasRef.current?.clearCanvas()} className='pathbutton'>Clear</Button>
           <ReactSketchCanvas
             ref={canvasRef}
-            height={color ? '577px' : '567px'}
-            width={color ? '636px' : '634px'}
+            height='568px'
+            width='568px'
             strokeWidth={5}
             strokeColor='#32a7dc'
             eraserWidth={100}
@@ -157,14 +348,14 @@ function MatchScout(props: any) {
             preserveBackgroundImageAspectRatio='xMidyMid meet'
             exportWithBackgroundImage={true}
           />
-          <Input disabled value={imageURI} name='URI'></Input>
+          <Input disabled value={imageURI.current} name='URI'></Input>
         </div>
       );
     };
     return (
       <div className='matchbody'>
         <Flex align='flex-end' justify='space-between'>
-          <h2 id='team'>{teamNum}</h2>
+          <h2 id='team'>{teamNum.current}</h2>
           <Form.Item<FieldType> label="Match #" name="matchnum" rules={[{ required: true, message: 'Please input the match number!' }]}>
             <InputNumber min={1} onChange={updateRobotInfo} />
           </Form.Item>
@@ -179,7 +370,7 @@ function MatchScout(props: any) {
                   setColor(true);
                   canvasRef.current?.resetCanvas();
                 }
-                updateRobotInfo();
+                await updateRobotInfo();
               }
             }} />
           </Form.Item>
@@ -187,25 +378,25 @@ function MatchScout(props: any) {
         <Flex justify='space-between'>
           <Flex vertical align='flex-start'>
             <Form.Item<FieldType> label="Robot Died" name="autondied" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
             <Form.Item<FieldType> label="Starting Location" name="startingloc" rules={[{ required: true, message: 'Please input the starting location!' }]}>
               <Select options={startingLoc} className='input' />
             </Form.Item>
             <Form.Item<FieldType> label="Docked" name="autondocked" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
             <Form.Item<FieldType> label="Engaged" name="autonengaged" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
           </Flex>
           <Flex vertical align="flex-end">
-            <Image.PreviewGroup items={directUrls}>
-              <Image src={directUrls[0] !== null ? directUrls[0] : no_image} style={{ height: 250 + 'px' }} />
+            <Image.PreviewGroup items={directURL}>
+              <Image src={directURL[0]} style={{ height: 250 + 'px' }} />
             </Image.PreviewGroup>
           </Flex>
         </Flex>
-        <Tabs defaultActiveKey="1" items={items} style={{ alignItems: 'center' }} />
+        <Tabs defaultActiveKey="1" items={items} style={{ alignItems: 'center', textAlign: 'center' }} />
       </div>
     );
   }
@@ -241,7 +432,7 @@ function MatchScout(props: any) {
     return (
       <div className='matchbody'>
         <Flex align='flex-end' justify='space-between'>
-          <h2 id='team'>{teamNum}</h2>
+          <h2 id='team'>{teamNum.current}</h2>
           <Form.Item<FieldType> label="Match #" name="matchnum" rules={[{ required: true, message: 'Please input the match number!' }]}>
             <InputNumber min={1} onChange={updateRobotInfo} />
           </Form.Item>
@@ -264,27 +455,27 @@ function MatchScout(props: any) {
         <Flex justify='space-between'>
           <Flex vertical align='flex-start'>
             <Form.Item<FieldType> label="Single Substation" name="single" rules={[{ required: true }]}>
-              <Button>fuck off</Button>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
             <Form.Item<FieldType> label="Double Substation" name="double" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
             <Form.Item<FieldType> label="Ground Intake" name="ground" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
             <Form.Item<FieldType> label="Robot Died" name="teleopdied" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
             <Form.Item<FieldType> label="Defended" name="defend" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
             <Form.Item<FieldType> label="Was Defended" name="wasdefend" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
           </Flex>
           <Flex vertical align="flex-end">
-            <Image.PreviewGroup items={directUrls}>
-              <Image src={directUrls[0] !== null ? directUrls[0] : no_image} style={{ height: 250 + 'px' }} />
+            <Image.PreviewGroup items={directURL}>
+              <Image src={directURL[0] !== null ? directURL[0] : no_image} style={{ height: 250 + 'px' }} />
             </Image.PreviewGroup>
           </Flex>
         </Flex>
@@ -306,6 +497,7 @@ function MatchScout(props: any) {
       driver?: number;
       penalty?: string;
       comments?: string;
+      selfbalance?: boolean;
     };
     const robotNum = [
       {
@@ -328,7 +520,7 @@ function MatchScout(props: any) {
     return (
       <div className='matchbody'>
         <Flex align='flex-end' justify='space-between'>
-          <h2 id='team'>{teamNum}</h2>
+          <h2 id='team'>{teamNum.current}</h2>
           <Form.Item<FieldType> label="Match #" name="matchnum" rules={[{ required: true, message: 'Please input the match number!' }]}>
             <InputNumber min={1} onChange={updateRobotInfo} />
           </Form.Item>
@@ -351,21 +543,24 @@ function MatchScout(props: any) {
         <Flex justify='space-between'>
           <Flex vertical align='flex-start'>
             <Form.Item<FieldType> label="Robot Died" name="enddied" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
             <Form.Item<FieldType> label="Docked" name="enddocked" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
             <Form.Item<FieldType> label="Engaged" name="endengaged" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
             <Form.Item<FieldType> label="Parked" name="parked" rules={[{ required: true }]}>
-              <Checkbox></Checkbox>
+              <Checkbox className='checkbox'></Checkbox>
+            </Form.Item>
+            <Form.Item<FieldType> label="Self Balance" name="selfbalance" rules={[{ required: true }]}>
+              <Checkbox className='checkbox'></Checkbox>
             </Form.Item>
           </Flex>
           <Flex vertical align="flex-end">
-            <Image.PreviewGroup items={directUrls}>
-              <Image src={directUrls[0] !== null ? directUrls[0] : no_image} style={{ height: 250 + 'px' }} />
+            <Image.PreviewGroup items={directURL}>
+              <Image src={directURL[0]} style={{ height: 250 + 'px' }} />
             </Image.PreviewGroup>
           </Flex>
         </Flex>
@@ -387,11 +582,9 @@ function MatchScout(props: any) {
             </Form.Item>
           </Flex>
         </Flex>
-        <TextArea style={{resize: 'none', height: 100 + 'px'}} placeholder='Penalties Occured' maxLength={100} showCount name='penalty'></TextArea>
-        <br></br>
-        <TextArea style={{resize: 'none', height: 100 + 'px'}} placeholder='Comments' maxLength={100} showCount name='comments'></TextArea>
-        <br></br>
-        <input type="submit" value="Submit" style={{border: 2 + 'px solid black', textAlign: 'center', marginLeft: 45 + '%'}} className='input'></input>
+        <TextArea placeholder='Penalties Occured' maxLength={100} className='textarea' showCount name='penalty'></TextArea>
+        <TextArea placeholder='Comments' maxLength={100} className='textarea' showCount name='comments'></TextArea>
+        <Input type="submit" value="Submit" className='submit'></Input>
       </div>
     )
   }
@@ -417,69 +610,6 @@ function MatchScout(props: any) {
       children: endMatch(),
     },
   ];
-  async function setNewMatchScout(event: any) {
-    const body = {
-      "matchIdentifier": {
-        "Initials": event.initials,
-        "Robot": event.robotnum,
-        "match_event": eventname,
-        "match_level": event.matchlevel,
-        "match_number": event.matchnum,
-        "team_number": teamNum,
-      },
-      "auto": {
-        "auto_total_points": 0,
-        "auto_cones_scored": 0,
-        "auto_missed_cone": 0,
-        "auto_cubes_scored": 0,
-        "auto_missed_cube": 0,
-        "auto_mobility": event.autonpath,
-        "auto_start_location": event.startingloc,
-        "auto_piecePickedUp": 0,
-        "auto_docked": event.autondocked,
-        "auto_engaged": event.autonengaged,
-        "autonPath": event.URI,
-      },
-      "teleop": {
-        "T_total_points": 0,
-        "T_missed_cone": 0,
-        "T_cones_scored": 0,
-        "T_missed_cube": 0,
-        "T_cubes_scored": 0,
-        "T_docked": event.enddocked,
-        "T_engaged": event.endengaged,
-        "T_parked": event.parked
-      },
-      "overall": {
-        "counter_defense": event.countdefense,
-        "intakeGround": event.ground,
-        "intakeSingle": event.single,
-        "intakeDouble": event.double,
-        "robot_died": event.enddied,
-        "intake_speed": event.intake,
-        "comments": event.comments,
-        "dropped_pieces": 0,
-        "was_defended": event.wasdefend,
-        "superchargedNodes": 0,
-        "penaltiesIncurred": event.penalty,
-      }
-    };
-    try {
-      await fetch(process.env.REACT_APP_FIREBASE_URL as string, {
-        method: "POST",
-        body: JSON.stringify(body),
-        headers: {
-          "Access-Control-Request-Headers":"Content-Type, Origin",
-          "Content-Type":"application/json",
-          "Origin":"localhost:3000",
-        }
-      }).then(response => response.json()).then(data => console.log(data));
-      redirect('./match');
-  }
-  catch (err) {
-    console.log(err);
-  }
-};
   return (
     <body>
       <div className='banner'>
@@ -510,11 +640,33 @@ function MatchScout(props: any) {
           enddocked: false,
           endengaged: false,
           parked: false,
+          selfbalance: false,
+
+          ll_high: false,
+          lm_high: false,
+          lr_high: false,
+          ml_high: false,
+          mm_high: false,
+          mr_high: false,
+          rl_high: false,
+          rm_high: false,
+          rr_high: false,
+          ll_mid: false,
+          lm_mid: false,
+          lr_mid: false,
+          ml_mid: false,
+          mm_mid: false,
+          mr_mid: false,
+          rl_mid: false,
+          rm_mid: false,
+          rr_mid: false,
         }}
         form={form}
-        onFinish={event => {
+        onFinish={async event => {
           try {
-            setNewMatchScout(event);
+            canvasRef.current?.exportImage('png').then(data => imageURI.current = data);
+            await setNewMatchScout(event);
+            window.location.reload();
           }
           catch (err) {
             console.log(err);

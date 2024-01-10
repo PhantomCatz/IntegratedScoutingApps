@@ -17,7 +17,7 @@ function HomePage(props: any) {
       <div className='body'>
         <Button className='mainbutton' href='/scoutingapp'>Scouting App</Button>
         <br></br>
-        <Button className='mainbutton' href='/dtf'>Drive Team Feeder</Button>
+        <Button className='mainbutton' href='/dtf'>DTF</Button>
       </div> 
     </body>
   );

@@ -1,3 +1,8 @@
+@font-face {
+    font-family: Audiowide;
+    src: url('../fonts/Audiowide-Regular.woff') format('woff');
+}
+
 .mainbutton {
     background-color: #32a7dc;
     color: #000000;
@@ -12,7 +17,7 @@
     cursor: pointer;
 }
 .backbutton {
-    background-color: #999999ff;
+    background-color: #999999;
     color: #000000;
     border: 2px solid black;
     border-radius: 15px;
@@ -49,10 +54,44 @@
     cursor: pointer;
     max-width: 25%;
 }
-.ant-select-selection {
-    background-color: #000000;
-}
 .input {
     min-width: 100px;
     width: 100px;
+    font-family: Audiowide;
+    text-align: center;
+}
+.checkbox {
+    .ant-checkbox .ant-checkbox-inner {
+        background-color: #999999;
+        border-color: #000000;
+        width: 200px;
+        height: 25px;
+        border-radius: 5px;
+    };
+    .ant-checkbox-checked .ant-checkbox-inner {
+        background-color: #61f761;
+        border-color: #000000;
+        width: 200px;
+        height: 25px;
+        border-radius: 5px;
+    };
+}
+.submit {
+    border: 1px solid black;
+    margin-bottom: 50px;
+    width: 50%;
+    text-align: center;
+    cursor: pointer;
+    align-self: center;
+    font-family: Audiowide;
+}
+.textarea {
+    resize: none;
+    height: 100px;
+    margin-bottom: 25px;
+    font-family: Audiowide;
+}
+.pathbutton {
+    width: fit-content;
+    font-family: Audiowide;
 }
